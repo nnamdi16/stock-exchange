@@ -7,9 +7,9 @@ import { MongooseModule } from '@nestjs/mongoose';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        uri: `mongodb+srv://${configService.get(
+        uri: `mongodb+srv://${configService.get<string>(
           'DB_USERNAME',
-        )}:${configService.get(
+        )}:${configService.get<string>(
           'DB_PASSWORD',
         )}@cluster0.fkmvzao.mongodb.net/stock-exchange`,
         retryAttempts: 2,
