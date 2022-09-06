@@ -56,7 +56,7 @@ describe('Quotes', () => {
 
   it('GET quote', () => {
     return request(app.getHttpServer())
-      .get('/quote?symbol=ABEO')
+      .get('quote?symbol=ABEO')
       .expect(200)
       .expect((res) => {
         expect(res.body.length > 0).toBe(true);
