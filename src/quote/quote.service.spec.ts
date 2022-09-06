@@ -1,4 +1,5 @@
-import { addMinutesToDate, subtractMinutesFromDate } from './../util/util';
+import { subtractMinutesFromDate } from '../util/util';
+import { addMinutesToDate } from './../util/util';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { Quote } from './entities/quote.entity';
 import { getModelToken } from '@nestjs/mongoose';
@@ -121,8 +122,8 @@ describe('QuoteService', () => {
         price: 127.79,
         symbol: 'MFST',
         _id: new Types.ObjectId('631575870a8d16f4660dc11f'),
-        updatedAt: subtractMinutesFromDate(5, new Date()),
-        createdAt: subtractMinutesFromDate(5, new Date()),
+        updatedAt: addMinutesToDate(5, new Date()),
+        createdAt: addMinutesToDate(5, new Date()),
       } as unknown as Quote & {
         _id: Types.ObjectId;
       };
@@ -160,8 +161,17 @@ describe('QuoteService', () => {
         price: 127.79,
         symbol: 'MFST',
         _id: new Types.ObjectId('631575870a8d16f4660dc11f'),
-        updatedAt: addMinutesToDate(5, new Date()),
-        createdAt: addMinutesToDate(5, new Date()),
+        updatedAt: subtractMinutesFromDate(10, new Date()),
+        createdAt: subtractMinutesFromDate(10, new Date()),
+      } as unknown as Quote & {
+        _id: Types.ObjectId;
+      };
+      const updatedQuote = {
+        price: 127.79,
+        symbol: 'MFST',
+        _id: new Types.ObjectId('631575870a8d16f4660dc11f'),
+        updatedAt: new Date(),
+        createdAt: new Date(),
       } as unknown as Quote & {
         _id: Types.ObjectId;
       };
@@ -175,9 +185,9 @@ describe('QuoteService', () => {
         .mockImplementationOnce(() => Promise.resolve(fetchedQuote));
       jest
         .spyOn(service, 'update')
-        .mockImplementationOnce(() => Promise.resolve(data));
+        .mockImplementationOnce(() => Promise.resolve(updatedQuote));
       expect(await service.getQuote(symbol)).toMatchObject(
-        expect.objectContaining(data),
+        expect.objectContaining(updatedQuote),
       );
     });
   });
