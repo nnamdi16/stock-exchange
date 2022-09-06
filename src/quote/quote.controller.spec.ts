@@ -1,59 +1,57 @@
+import { ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { QuoteController } from './quote.controller';
 import { QuoteService } from './quote.service';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connect, Connection, Model } from 'mongoose';
-import { Quote, QuoteSchema } from './entities/quote.entity';
+import { Model, Types } from 'mongoose';
+import { Quote } from './entities/quote.entity';
 import { getModelToken } from '@nestjs/mongoose';
+import * as sinon from 'sinon';
+import { subtractMinutesFromDate } from '../util/util';
 
 describe('QuoteController', () => {
   let controller: QuoteController;
-  let mongod: MongoMemoryServer;
-  let mongoConnection: Connection;
-  let quoteModel: Model<Quote>;
+  let service: QuoteService;
+  const data = {
+    price: 127.79,
+    symbol: 'MFST',
+    _id: new Types.ObjectId('631575870a8d16f4660dc11f'),
+    updatedAt: subtractMinutesFromDate(5, new Date()),
+    createdAt: subtractMinutesFromDate(5, new Date()),
+  } as unknown as Quote & {
+    _id: Types.ObjectId;
+  };
 
-  beforeAll(async () => {
-    mongod = await MongoMemoryServer.create();
-    const uri = mongod.getUri();
-    mongoConnection = (await connect(uri)).connection;
-    quoteModel = mongoConnection.model(Quote.name, QuoteSchema);
-    const app: TestingModule = await Test.createTestingModule({
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [HttpModule],
       controllers: [QuoteController],
       providers: [
-        QuoteService,
+        {
+          provide: QuoteService,
+          useValue: {
+            getQuote: jest.fn().mockResolvedValue(data),
+          },
+        },
+        ConfigService,
         {
           provide: getModelToken(Quote.name),
-          useValue: quoteModel,
+          useValue: sinon.createStubInstance(Model),
         },
       ],
     }).compile();
-    controller = app.get<QuoteController>(QuoteController);
+
+    controller = module.get<QuoteController>(QuoteController);
+    service = module.get<QuoteService>(QuoteService);
   });
-
-  afterAll(async () => {
-    await mongoConnection.dropDatabase();
-    await mongoConnection.close();
-    await mongod.stop();
-  });
-
-  afterEach(async () => {
-    const collections = mongoConnection.collections;
-    for (const key in collections) {
-      const collection = collections[key];
-      await collection.deleteMany({});
-    }
-  });
-
-  // beforeEach(async () => {
-  //   const module: TestingModule = await Test.createTestingModule({
-  //     controllers: [QuoteController],
-  //     providers: [QuoteService],
-  //   }).compile();
-
-  //   controller = module.get<QuoteController>(QuoteController);
-  // });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('Fetch Quote', () => {
+    it('should fetch quote for a symbool', () => {
+      expect(controller.findOne({ symbol: 'MFST' })).resolves.toEqual(data);
+    });
   });
 });
