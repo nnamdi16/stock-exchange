@@ -1,3 +1,4 @@
+import { addMinutesToDate } from './../util/util';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -7,7 +8,6 @@ import { Model, Types } from 'mongoose';
 import { Quote } from './entities/quote.entity';
 import { getModelToken } from '@nestjs/mongoose';
 import * as sinon from 'sinon';
-import { subtractMinutesFromDate } from '../util/util';
 
 describe('QuoteController', () => {
   let controller: QuoteController;
@@ -16,8 +16,8 @@ describe('QuoteController', () => {
     price: 127.79,
     symbol: 'MFST',
     _id: new Types.ObjectId('631575870a8d16f4660dc11f'),
-    updatedAt: subtractMinutesFromDate(5, new Date()),
-    createdAt: subtractMinutesFromDate(5, new Date()),
+    updatedAt: addMinutesToDate(5, new Date()),
+    createdAt: addMinutesToDate(5, new Date()),
   } as unknown as Quote & {
     _id: Types.ObjectId;
   };
