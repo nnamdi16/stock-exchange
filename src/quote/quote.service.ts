@@ -34,7 +34,7 @@ export class QuoteService {
       return await this.create({ symbol });
     }
 
-    if (addMinutesToDate(5, existingQuote.updatedAt) > new Date()) {
+    if (new Date() > addMinutesToDate(5, existingQuote.updatedAt)) {
       const updatedQuote = (await this.fetchQuote(symbol)) as UpdateQuoteDto;
       return await this.update({ symbol }, updatedQuote);
     }
